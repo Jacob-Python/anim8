@@ -5,6 +5,7 @@ import java.awt.event.MouseEvent;
 import java.net.URL;
 
 public class SwingUI {
+    JButton render;
     JButton ups;
     JButton rf1;
     JButton lf;
@@ -119,6 +120,11 @@ public class SwingUI {
         um.setVisible(false);
         panel.add(um);
         //
+        render = new JButton("Render animation");
+        render.setBounds(270, 380, 190, 30);
+        render.addActionListener(new Main());
+        render.setVisible(false);
+        panel.add(render);
         fct = new JLabel("");
         fct.setBounds(270, -3, 600, 90);
         fct.setVisible(false);
@@ -160,7 +166,7 @@ public class SwingUI {
         saveFrame.setVisible(false);
         panel.add(saveFrame);
         list = new JLabel("<html>Animations");
-        list.setBounds(270, 340, 600, 90);
+        list.setBounds(270, 380, 600, 90);
         list.setVisible(false);
         panel.add(list);
         //
@@ -187,7 +193,7 @@ public class SwingUI {
         panel.add(pop);
         //
         error = new JLabel("Error", SwingConstants.CENTER);
-        error.setBounds(2, 600, 600, 70);
+        error.setBounds(2, 630, 600, 70);
         error.setBorder(BorderFactory.createLineBorder(Color.red, 5));
         error.setVisible(false);
         error.addMouseListener(new MouseAdapter() {

@@ -327,6 +327,15 @@ public class Main extends PApplet implements ActionListener {
         if (e.getSource() == ui.pop){
             Main.frames.remove(Main.framei);
         }
+        if (e.getSource() == ui.render){
+            Runtime rt = Runtime.getRuntime();
+            // TODO: Add renderer app
+            try {
+                rt.exec(String.format("%%localappdata%%/anim8/an8render.exe \"%s\"",Main.path));
+            } catch (IOException ioException) {
+                popup("Sorry, couldn't render.");
+            }
+        }
         if (e.getSource() == ui.open){
             String name = ui.nt.getText();
             Main.path = Constants.documents+name+"/"+name+".a8p";
@@ -421,6 +430,7 @@ public class Main extends PApplet implements ActionListener {
                 ui.msel.setText(String.format("<html>Enter model number. <br>There are %s models in this file.", Main.blocks.size()));
                 ui.m.setVisible(true);
                 ui.rf1.setVisible(true);
+                ui.render.setVisible(true);
                 ui.lf.setVisible(true);
                 ui.dm.setVisible(true);
                 ui.um.setVisible(true);
@@ -584,6 +594,7 @@ public class Main extends PApplet implements ActionListener {
             if (success){
                 ui.header.setVisible(false);
                 ui.rf.setVisible(true);
+                ui.render.setVisible(true);
                 ui.fct.setVisible(true);
                 ui.gf.setVisible(true);
                 ui.saveFrame.setVisible(true);
@@ -645,7 +656,7 @@ public class Main extends PApplet implements ActionListener {
             li=li+String.format("<li>Transform: %s<br>Number: %s",ui.transf[t.type], ct+1);
             ct++;
         }
-        ui.list.setBounds(270, 340+(ct*5), 600, 90+(ct*30));
+        ui.list.setBounds(270, 380+(ct*5), 600, 90+(ct*30));
         ui.list.setText(String.format("<html>Animations: <ul>%s</ul>",li));
     }
 
