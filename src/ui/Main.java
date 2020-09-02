@@ -313,7 +313,7 @@ public class Main extends PApplet implements ActionListener {
             try {
                 Main.trans=Main.frames.get(framei);
                 updateList();
-            } catch (NullPointerException ee) {
+            } catch (IndexOutOfBoundsException ee) {
                 Main.trans=new ArrayList<>();
                 updateList();
             }
@@ -328,120 +328,114 @@ public class Main extends PApplet implements ActionListener {
             Main.frames.remove(Main.framei);
         }
         if (e.getSource() == ui.open){
-            ui.chooser.setDialogTitle("Choose Anim8 project");
-            FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                    "Anim8 Projects (*.a8p)", "a8p");
-            ui.chooser.setFileFilter(filter);
-            int userSelection = ui.chooser.showOpenDialog(ui.panel);
-            if (userSelection == JFileChooser.APPROVE_OPTION) {
-                File fileToSave = ui.chooser.getSelectedFile();
-                Main.path = fileToSave.getAbsolutePath();
-                File myObj = new File(Main.path);
-                ArrayList<String> lines = new ArrayList<>();
-                boolean success=true;
-                try {
-                    Scanner myReader = new Scanner(myObj);
-                    while (myReader.hasNextLine()){
-                        lines.add(myReader.nextLine());
-                    }
-                    Main.globalData.add(lines.get(0));
-                } catch (FileNotFoundException fileNotFoundException) {
-                    success=false;
-                    popup(String.format("File %s not found.",Main.path));
+            String name = ui.nt.getText();
+            Main.path = Constants.documents+name+"/"+name+".a8p";
+            File myObj = new File(Main.path);
+            ArrayList<String> lines = new ArrayList<>();
+            boolean success=true;
+            try {
+                Scanner myReader = new Scanner(myObj);
+                while (myReader.hasNextLine()){
+                    lines.add(myReader.nextLine());
                 }
-                if (success) {
-                    String lbundle = "";
-                    int ahas = 0;
-                    int has = 0;
-                    ArrayList<String> liness = new ArrayList<>();
-                    for (String l : lines) {
-                        if (has == 0 && l.contains(new StringBuffer("@model"))) {
-                            has = 1;
-                            lbundle = l + "\n";
-                        }
-                        if (has == 1 && l.contains(new StringBuffer("@shape "))) {
-                            lbundle = lbundle + l + "\n";
-                        }
-                        if (has == 1 && l.contains(new StringBuffer("@end"))) {
-                            lbundle = lbundle + "@end";
-                            Main.blocks.add(lbundle);
-                            Main.globalData.add(lbundle);
-                            has = 0;
-                        }
-                        //Anim block
-                        if (has == 0 && l.contains(new StringBuffer("@anim"))) {
-                            ahas = 1;
-                            Main.animb = "@anim\n";
-                        }
-                        if (ahas == 1 && l.contains(new StringBuffer("@ani "))) {
-                            liness.add(l.replace("\t", ""));
-                            Main.animb = Main.animb+l+"\n";
-                        }
-                        if (ahas == 1 && l.contains(new StringBuffer("@end"))) {
-                            ahas = 0;
-                            Main.animb = Main.animb+"@end";
-                        }
+                Main.globalData.add(lines.get(0));
+            } catch (FileNotFoundException fileNotFoundException) {
+                success=false;
+                popup(String.format("File %s not found.",Main.path));
+            }
+            if (success) {
+                String lbundle = "";
+                int ahas = 0;
+                int has = 0;
+                ArrayList<String> liness = new ArrayList<>();
+                for (String l : lines) {
+                    if (has == 0 && l.contains(new StringBuffer("@model"))) {
+                        has = 1;
+                        lbundle = l + "\n";
                     }
-                    ArrayList<String> frameblks = new ArrayList<>();
-                    int f = 0;
-                    String buf = "";
-                    for (String s : liness) {
-                        String[] spll = s.split(" ");
-                        if (ip(spll[1]) != f) {
-                            frameblks.add(buf);
-                            buf = "";
-                            f++;
-                        }
-                        buf = buf + s + "\n";
+                    if (has == 1 && l.contains(new StringBuffer("@shape "))) {
+                        lbundle = lbundle + l + "\n";
                     }
-                    if (!buf.equals("")) {
+                    if (has == 1 && l.contains(new StringBuffer("@end"))) {
+                        lbundle = lbundle + "@end";
+                        Main.blocks.add(lbundle);
+                        Main.globalData.add(lbundle);
+                        has = 0;
+                    }
+                    //Anim block
+                    if (has == 0 && l.contains(new StringBuffer("@anim"))) {
+                        ahas = 1;
+                        Main.animb = "@anim\n";
+                    }
+                    if (ahas == 1 && l.contains(new StringBuffer("@ani "))) {
+                        liness.add(l.replace("\t", ""));
+                        Main.animb = Main.animb+l+"\n";
+                    }
+                    if (ahas == 1 && l.contains(new StringBuffer("@end"))) {
+                        ahas = 0;
+                        Main.animb = Main.animb+"@end";
+                    }
+                }
+                ArrayList<String> frameblks = new ArrayList<>();
+                int f = 0;
+                String buf = "";
+                for (String s : liness) {
+                    String[] spll = s.split(" ");
+                    if (ip(spll[1]) != f) {
                         frameblks.add(buf);
-                    }
-                    f = 0;
-                    for (String fr : frameblks) {
-                        ArrayList<Transform> trans_t = new ArrayList<>();
-                        String[] spli = fr.split("\n");
-                        for (String s : spli) {
-                            String[] l_tokens = s.split(" ");
-                            trans_t.add(new Transform(ip(l_tokens[2]), ip(l_tokens[3]), ip(l_tokens[4]), new Coordinates(ip(l_tokens[5]), ip(l_tokens[6]))));
-                        }
-                        Main.frames.add(trans_t);
+                        buf = "";
                         f++;
                     }
-                    Main.mode = 0;
-                    Main.framei=Main.frames.size();
-                    Main.modelNum=Main.blocks.size();
-                    Main.parseBlock(0);
-                    ui.name.setVisible(false);
-                    ui.nt.setVisible(false);
-                    ui.submit.setVisible(false);
-                    ui.open.setVisible(false);
-                    ui.rf.setVisible(true);
-                    ui.ups.setVisible(true);
-                    ui.gf.setVisible(true);
-                    ui.bf.setVisible(true);
-                    ui.submit1.setVisible(true);
-                    ui.rgbl.setVisible(true);
-                    ui.msel.setVisible(true);
-                    ui.fct.setVisible(true);
-                    ui.msel.setText(String.format("<html>Enter model number. <br>There are %s models in this file.", Main.blocks.size()));
-                    ui.m.setVisible(true);
-                    ui.rf1.setVisible(true);
-                    ui.lf.setVisible(true);
-                    ui.dm.setVisible(true);
-                    ui.um.setVisible(true);
-                    ui.setm.setVisible(true);
-                    ui.sel.setVisible(true);
-                    ui.adda.setVisible(true);
-                    ui.animop.setVisible(true);
-                    ui.coordorrad.setVisible(true);
-                    ui.num.setVisible(true);
-                    ui.popFrame.setVisible(true);
-                    ui.buildFrame.setVisible(true);
-                    ui.saveFrame.setVisible(true);
-                    ui.list.setVisible(true);
-                    ui.pop.setVisible(true);
+                    buf = buf + s + "\n";
                 }
+                if (!buf.equals("")) {
+                    frameblks.add(buf);
+                }
+                f = 0;
+                for (String fr : frameblks) {
+                    ArrayList<Transform> trans_t = new ArrayList<>();
+                    String[] spli = fr.split("\n");
+                    for (String s : spli) {
+                        String[] l_tokens = s.split(" ");
+                        trans_t.add(new Transform(ip(l_tokens[2]), ip(l_tokens[3]), ip(l_tokens[4]), new Coordinates(ip(l_tokens[5]), ip(l_tokens[6]))));
+                    }
+                    Main.frames.add(trans_t);
+                    f++;
+                }
+                Main.mode = 0;
+                Main.framei=Main.frames.size();
+                Main.modelNum=Main.blocks.size();
+                Main.parseBlock(0);
+                ui.name.setVisible(false);
+                ui.nt.setVisible(false);
+                ui.submit.setVisible(false);
+                ui.open.setVisible(false);
+                ui.rf.setVisible(true);
+                ui.ups.setVisible(true);
+                ui.gf.setVisible(true);
+                ui.bf.setVisible(true);
+                ui.submit1.setVisible(true);
+                ui.rgbl.setVisible(true);
+                ui.msel.setVisible(true);
+                ui.fct.setVisible(true);
+                ui.msel.setText(String.format("<html>Enter model number. <br>There are %s models in this file.", Main.blocks.size()));
+                ui.m.setVisible(true);
+                ui.rf1.setVisible(true);
+                ui.lf.setVisible(true);
+                ui.dm.setVisible(true);
+                ui.um.setVisible(true);
+                ui.setm.setVisible(true);
+                ui.header.setVisible(false);
+                ui.sel.setVisible(true);
+                ui.adda.setVisible(true);
+                ui.animop.setVisible(true);
+                ui.coordorrad.setVisible(true);
+                ui.num.setVisible(true);
+                ui.popFrame.setVisible(true);
+                ui.buildFrame.setVisible(true);
+                ui.saveFrame.setVisible(true);
+                ui.list.setVisible(true);
+                ui.pop.setVisible(true);
             }
         }
         if  (e.getSource() == ui.setm){
@@ -569,42 +563,42 @@ public class Main extends PApplet implements ActionListener {
             if (!globalData.contains("@proj "+name+ "\n@anim\n@end")) {
                 globalData.add("@proj " + name+ "\n@anim\n@end");
             }
-            FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                    "Anim8 Projects (*.a8p)", "a8p");
-            ui.chooser.setFileFilter(filter);
-            ui.chooser.setSelectedFile(new File(name+".a8p"));
-            int userSelection = ui.chooser.showSaveDialog(ui.panel);
-            if (userSelection == JFileChooser.APPROVE_OPTION) {
-                File fileToSave = ui.chooser.getSelectedFile();
-                Main.path = fileToSave.getAbsolutePath();
-                try {
-                    File myObj = new File(Main.path);
-                    if (myObj.createNewFile()) {
-                        FileWriter myWriter = new FileWriter(Main.path);
-                        myWriter.write("@proj "+name);
-                        myWriter.close();
-                    } else {
-                        popup("File exists, try another name.");
-                    }
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+            boolean success = true;
+            Main.path = Constants.documents+name+"/"+name+".a8p";
+            try {
+                File myObj = new File(Main.path);
+                File dir = new File(Constants.documents+name);
+                if (dir.mkdir()) {
+                    myObj.createNewFile();
+                    FileWriter myWriter = new FileWriter(Main.path);
+                    myWriter.write("@proj "+name+ "\n@anim\n@end");
+                    myWriter.close();
+                } else {
+                    success = false;
+                    popup("Project exists, try another name.");
                 }
+            } catch (IOException ioException) {
+                success = false;
+                ioException.printStackTrace();
             }
-            ui.rf.setVisible(true);
-            ui.fct.setVisible(true);
-            ui.gf.setVisible(true);
-            ui.saveFrame.setVisible(true);
-            ui.bf.setVisible(true);
-            ui.submit1.setVisible(true);
-            ui.rgbl.setVisible(true);
-            ui.sel.setVisible(true);
-            ui.adda.setVisible(true);
-            ui.animop.setVisible(true);
-            ui.coordorrad.setVisible(true);
-            ui.num.setVisible(true);
-            ui.popFrame.setVisible(true);
-            ui.buildFrame.setVisible(true);
-            ui.list.setVisible(true);
+            if (success){
+                ui.header.setVisible(false);
+                ui.rf.setVisible(true);
+                ui.fct.setVisible(true);
+                ui.gf.setVisible(true);
+                ui.saveFrame.setVisible(true);
+                ui.bf.setVisible(true);
+                ui.submit1.setVisible(true);
+                ui.rgbl.setVisible(true);
+                ui.sel.setVisible(true);
+                ui.adda.setVisible(true);
+                ui.animop.setVisible(true);
+                ui.coordorrad.setVisible(true);
+                ui.num.setVisible(true);
+                ui.popFrame.setVisible(true);
+                ui.buildFrame.setVisible(true);
+                ui.list.setVisible(true);
+            }
         }
         if (e.getSource() == ui.submit1){
             try {
