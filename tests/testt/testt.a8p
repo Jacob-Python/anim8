@@ -1,0 +1,26 @@
+@proj test
+@model 0
+	@shape (188,59) square (213,84) 50 0|0|255
+@end
+
+@model 1
+	@shape (271,160) square (296,185) 50 0|255|0
+	@shape (160,167) square (185,192) 50 0|255|0
+@end
+
+@model 2
+	@shape (225,134) square (250,159) 50 255|0|0
+	@shape (347,99) square (372,124) 50 255|0|0
+	@shape (248,242) square (273,267) 50 255|0|0
+	@shape (443,225) square (468,250) 50 255|0|0
+@end
+@anim
+	@ani 0 0 0 0 0 0
+	@ani 0 0 0 0 0 1
+	@ani 0 0 1 1 0 0
+	@ani 0 1 1 1 0 0
+	@ani 1 0 2 3 0 0
+	@ani 1 1 2 3 0 67
+	@ani 2 0 2 3 0 0
+	@ani 2 0 2 12 0 0
+@end

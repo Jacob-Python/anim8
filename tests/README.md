@@ -1,0 +1,1 @@
+This is just a few basic Anim8 projects to test Anim8's capabilities.
