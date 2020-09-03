@@ -1,1 +1,0 @@
-This code is just a placeholder to test Anim8's render function annd JSmooth.
