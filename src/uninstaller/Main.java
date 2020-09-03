@@ -16,7 +16,7 @@ public class Main implements ActionListener {
     public static void main(String[] args) {
         panel = new JPanel();
         panel.setLayout(null);
-        frame = new JFrame("Anim8 GUI Window");
+        frame = new JFrame("Uninstall Anim8");
         frame.setSize(500,300);
         frame.setVisible(true);
         URL imageURL = Main.class.getClassLoader().getResource("icon.png");
