@@ -1,14 +1,21 @@
+import com.xuggle.mediatool.IMediaWriter;
+import com.xuggle.mediatool.ToolFactory;
+import com.xuggle.xuggler.ICodec;
 import processing.core.PApplet;
 import processing.core.PImage;
+import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static com.xuggle.xuggler.video.ConverterFactory.convertToType;
 
 public class Main extends PApplet implements ActionListener {
     static int mode = 1;
@@ -27,7 +34,6 @@ public class Main extends PApplet implements ActionListener {
     public static String animb = "";
     public static int framei = 0;
 
-    // jar cfv Project1.jar *
     public static void main(String[] args) {
         PApplet.main("Main");
     }
@@ -314,6 +320,7 @@ public class Main extends PApplet implements ActionListener {
                 Main.trans=Main.frames.get(framei);
                 updateList();
             } catch (IndexOutOfBoundsException ee) {
+
                 Main.trans=new ArrayList<>();
                 updateList();
             }
@@ -329,15 +336,50 @@ public class Main extends PApplet implements ActionListener {
         }
         if (e.getSource() == ui.render){
             Runtime rt = Runtime.getRuntime();
-            // TODO: Add renderer app
             try {
-                rt.exec(String.format("%%localappdata%%/anim8/an8render.exe \"%s\"",Main.path));
+                rt.exec(String.format(String.format("C:/Users/%s/AppData/Local/anim8/a8r.exe 1 %s",System.getProperty("user.name"),(String)ui.nt.getSelectedItem())));
             } catch (IOException ioException) {
+                ioException.printStackTrace();
                 popup("Sorry, couldn't render.");
+            }
+            String name = (String)ui.nt.getSelectedItem();
+            final IMediaWriter writer = ToolFactory.makeWriter(Constants.documents+name+"/"+name+".mp4");
+            writer.addVideoStream(0, 0, ICodec.ID.CODEC_ID_MPEG4, Constants.windowWidth, Constants.windowHeight);
+            long startTime = System.nanoTime();
+            int frame = 0;
+            File folder = new File(Constants.documents+name+"/frames");
+            File[] listOfFiles = folder.listFiles();
+            int indexVal = 0;
+            ArrayList<File> im = new ArrayList<>();
+            for (File file : listOfFiles) {
+                if (file.isFile()) {
+                    indexVal++;
+                    im.add(file);
+                }
+            }
+            for (int index = 1; index < listOfFiles.length; index++) {
+                BufferedImage screen = null;
+                try {
+                    screen = ImageIO.read(im.get(index));
+                    BufferedImage bgrScreen = convertToType(screen, BufferedImage.TYPE_3BYTE_BGR);
+                    writer.encodeVideo(0, bgrScreen, 300*index, TimeUnit.MILLISECONDS);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+            writer.close();
+        }
+        if (e.getSource() == ui.show){
+            Runtime rt = Runtime.getRuntime();
+            try {
+                rt.exec(String.format("C:/Users/%s/AppData/Local/anim8/a8r.exe 0 %s",System.getProperty("user.name"),(String)ui.nt.getSelectedItem()));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+                popup("Sorry, couldn't preview.");
             }
         }
         if (e.getSource() == ui.open){
-            String name = ui.nt.getText();
+            String name = (String)ui.nt.getSelectedItem();
             Main.path = Constants.documents+name+"/"+name+".a8p";
             File myObj = new File(Main.path);
             ArrayList<String> lines = new ArrayList<>();
@@ -437,6 +479,7 @@ public class Main extends PApplet implements ActionListener {
                 ui.setm.setVisible(true);
                 ui.header.setVisible(false);
                 ui.sel.setVisible(true);
+                ui.show.setVisible(true);
                 ui.adda.setVisible(true);
                 ui.animop.setVisible(true);
                 ui.coordorrad.setVisible(true);
@@ -497,7 +540,7 @@ public class Main extends PApplet implements ActionListener {
                 }
                 if (s instanceof Line){
                     Line n = ((Line) s);
-                    out.add(String.format("\t@shape (%s,%s) (%s,%s) (%s,%s) %s %s %s", n.b.x, n.b.y, n.e.x, n.e.y, s.s.x, s.s.y, s.r, s.fill));
+                    out.add(String.format("\t@shape (%s,%s) (%s,%s) (%s,%s) %s %s", n.b.x, n.b.y, n.e.x, n.e.y, s.s.x, s.s.y, s.r, s.fill));
                 }
             }
             out.add("@end");
@@ -552,6 +595,7 @@ public class Main extends PApplet implements ActionListener {
                 for (String l : lines){
                     concat=concat+l+"\n";
                 }
+                System.out.println(Main.animb);
                 concat=concat.replace(Main.animb, out);
                 Main.animb=out;
                 FileWriter myWriter = new FileWriter(Main.path);
@@ -564,7 +608,7 @@ public class Main extends PApplet implements ActionListener {
 
         }
         if (e.getSource() == ui.submit){
-            name = ui.nt.getText();
+            name = (String)ui.nt.getSelectedItem();
             ui.name.setVisible(false);
             ui.nt.setVisible(false);
             ui.submit.setVisible(false);
@@ -595,6 +639,7 @@ public class Main extends PApplet implements ActionListener {
                 ui.header.setVisible(false);
                 ui.rf.setVisible(true);
                 ui.render.setVisible(true);
+                ui.show.setVisible(true);
                 ui.fct.setVisible(true);
                 ui.gf.setVisible(true);
                 ui.saveFrame.setVisible(true);
@@ -656,7 +701,7 @@ public class Main extends PApplet implements ActionListener {
             li=li+String.format("<li>Transform: %s<br>Number: %s",ui.transf[t.type], ct+1);
             ct++;
         }
-        ui.list.setBounds(270, 380+(ct*5), 600, 90+(ct*30));
+        ui.list.setBounds(270, 420+(ct*5), 600, 90+(ct*30));
         ui.list.setText(String.format("<html>Animations: <ul>%s</ul>",li));
     }
 
@@ -694,7 +739,7 @@ public class Main extends PApplet implements ActionListener {
     }
 
     private static void popup(String s) {
-        ui.error.setText("<html><h2>"+s+"<br>Click to dismiss.");
+        ui.error.setText("<html><h4>"+s+" Click to dismiss.");
         ui.error.setVisible(true);
     }
 }

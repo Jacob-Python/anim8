@@ -2,7 +2,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class SwingUI {
     JButton render;
@@ -19,6 +21,7 @@ public class SwingUI {
     JTextField num;
     JButton popFrame;
     JButton buildFrame;
+    JButton show;
     JButton saveFrame;
     JLabel header;
     String[] transf = {"Scale", "Move"};
@@ -28,7 +31,7 @@ public class SwingUI {
     JLabel animop;
     JLabel list;
     JLabel name;
-    JTextField nt;
+    JComboBox nt;
     JPanel panel;
     JFrame frame;
     JLabel rgbl;
@@ -44,6 +47,14 @@ public class SwingUI {
     JTextField m;
     JButton setm;
     public SwingUI(){
+        File folder = new File(Constants.documents);
+        File[] listOfFiles = folder.listFiles();
+        ArrayList<String> dir = new ArrayList<>();
+        for (File file : listOfFiles) {
+            if (!file.isFile()) {
+                dir.add(file.getName());
+            }
+        }
         panel = new JPanel();
         panel.setLayout(null);
         frame = new JFrame("Anim8 GUI Window");
@@ -61,7 +72,7 @@ public class SwingUI {
         name = new JLabel("Enter project name");
         name.setBounds(200, 200, 600, 30);
         panel.add(name);
-        nt = new JTextField();
+        nt = new JComboBox(dir.toArray(new String[0]));
         nt.setBounds(200, 250, 100, 30);
         panel.add(nt);
         submit = new JButton("Create project");
@@ -125,6 +136,11 @@ public class SwingUI {
         render.addActionListener(new Main());
         render.setVisible(false);
         panel.add(render);
+        show = new JButton("Preview animation");
+        show.setBounds(270, 420, 190, 30);
+        show.addActionListener(new Main());
+        show.setVisible(false);
+        panel.add(show);
         fct = new JLabel("");
         fct.setBounds(270, -3, 600, 90);
         fct.setVisible(false);
@@ -166,7 +182,7 @@ public class SwingUI {
         saveFrame.setVisible(false);
         panel.add(saveFrame);
         list = new JLabel("<html>Animations");
-        list.setBounds(270, 380, 600, 90);
+        list.setBounds(270, 420, 600, 90);
         list.setVisible(false);
         panel.add(list);
         //
@@ -193,7 +209,7 @@ public class SwingUI {
         panel.add(pop);
         //
         error = new JLabel("Error", SwingConstants.CENTER);
-        error.setBounds(2, 630, 600, 70);
+        error.setBounds(2, 660, 750, 40);
         error.setBorder(BorderFactory.createLineBorder(Color.red, 5));
         error.setVisible(false);
         error.addMouseListener(new MouseAdapter() {
