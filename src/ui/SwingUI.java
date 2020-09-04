@@ -18,6 +18,7 @@ public class SwingUI {
     JButton um;
     JButton dm;
     JButton submit;
+    JComboBox inse;
     JTextField num;
     JButton popFrame;
     JButton buildFrame;
@@ -31,11 +32,13 @@ public class SwingUI {
     JLabel animop;
     JLabel list;
     JLabel name;
+    JLabel nl;
     JComboBox nt;
     JPanel panel;
     JFrame frame;
     JLabel rgbl;
     JLabel error;
+    JTextField namef;
     JTextField rf;
     JTextField gf;
     JTextField bf;
@@ -47,14 +50,6 @@ public class SwingUI {
     JTextField m;
     JButton setm;
     public SwingUI(){
-        File folder = new File(Constants.documents);
-        File[] listOfFiles = folder.listFiles();
-        ArrayList<String> dir = new ArrayList<>();
-        for (File file : listOfFiles) {
-            if (!file.isFile()) {
-                dir.add(file.getName());
-            }
-        }
         panel = new JPanel();
         panel.setLayout(null);
         frame = new JFrame("Anim8 GUI Window");
@@ -65,22 +60,52 @@ public class SwingUI {
         frame.setIconImage(img.getImage());
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.add(panel);
+        error = new JLabel("Error", SwingConstants.CENTER);
+        error.setBounds(2, 660, 750, 40);
+        error.setBorder(BorderFactory.createLineBorder(Color.red, 5));
+        error.setVisible(false);
+        error.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                error.setVisible(false);
+            }
+        });
+        panel.add(error);
+        ArrayList<String> dir = new ArrayList<>();
+        try {
+            File folder = new File(Constants.documents);
+            File[] listOfFiles = folder.listFiles();
+            for (File file : listOfFiles) {
+                if (!file.isFile()) {
+                    dir.add(file.getName());
+                }
+            }
+        } catch (NullPointerException e){
+            error.setText("<html><h4>Project directory not found. Click to dismiss.");
+            error.setVisible(true);
+        }
         header = new JLabel("<html><h1>Anim8 Animation Software</h1><h3>Made with Processing.");
         header.setBounds(200, 100, 300, 100);
         header.setVisible(true);
         panel.add(header);
-        name = new JLabel("Enter project name");
+        name = new JLabel("Select project");
         name.setBounds(200, 200, 600, 30);
         panel.add(name);
         nt = new JComboBox(dir.toArray(new String[0]));
         nt.setBounds(200, 250, 100, 30);
         panel.add(nt);
+        nl = new JLabel("Enter name");
+        nl.setBounds(200, 350, 600, 30);
+        panel.add(nl);
+        namef = new JTextField();
+        namef.setBounds(200, 400, 100, 30);
+        panel.add(namef);
         submit = new JButton("Create project");
-        submit.setBounds(200, 300, 160, 30);
+        submit.setBounds(200, 450, 160, 30);
         submit.addActionListener(new Main());
         panel.add(submit);
         open = new JButton("Open project");
-        open.setBounds(200, 350, 160, 30);
+        open.setBounds(200, 300, 160, 30);
         open.addActionListener(new Main());
         panel.add(open);
         rgbl = new JLabel("Enter RGB color below to texture");
@@ -132,12 +157,12 @@ public class SwingUI {
         panel.add(um);
         //
         render = new JButton("Render animation");
-        render.setBounds(270, 380, 190, 30);
+        render.setBounds(270, 430, 190, 30);
         render.addActionListener(new Main());
         render.setVisible(false);
         panel.add(render);
         show = new JButton("Preview animation");
-        show.setBounds(270, 420, 190, 30);
+        show.setBounds(270, 470, 190, 30);
         show.addActionListener(new Main());
         show.setVisible(false);
         panel.add(show);
@@ -157,32 +182,36 @@ public class SwingUI {
         coordorrad.setBounds(270, 140, 100, 30);
         coordorrad.setVisible(false);
         panel.add(coordorrad);
+        inse = new JComboBox(Main.inl.toArray());
+        inse.setBounds(270, 180, 190, 30);
+        inse.setVisible(false);
+        panel.add(inse);
         adda = new JButton("Add animation to selected (max 5 animations/frame)");
-        adda.setBounds(270, 180, 340, 30);
+        adda.setBounds(270, 220, 340, 30);
         adda.addActionListener(new Main());
         adda.setVisible(false);
         panel.add(adda);
         num = new JTextField();
-        num.setBounds(270, 220, 100, 30);
+        num.setBounds(270, 270, 100, 30);
         num.setVisible(false);
         panel.add(num);
-        popFrame = new JButton("Delete selected");
-        popFrame.setBounds(270, 260, 190, 30);
+        popFrame = new JButton("Delete animation by number");
+        popFrame.setBounds(270, 310, 220, 30);
         popFrame.addActionListener(new Main());
         popFrame.setVisible(false);
         panel.add(popFrame);
         buildFrame = new JButton("Merge all into frame");
-        buildFrame.setBounds(270, 300, 210, 30);
+        buildFrame.setBounds(270, 350, 210, 30);
         buildFrame.addActionListener(new Main());
         buildFrame.setVisible(false);
         panel.add(buildFrame);
         saveFrame = new JButton("Save animations");
-        saveFrame.setBounds(270, 340, 210, 30);
+        saveFrame.setBounds(270, 390, 210, 30);
         saveFrame.addActionListener(new Main());
         saveFrame.setVisible(false);
         panel.add(saveFrame);
         list = new JLabel("<html>Animations");
-        list.setBounds(270, 420, 600, 90);
+        list.setBounds(270, 470, 600, 90);
         list.setVisible(false);
         panel.add(list);
         //
@@ -207,17 +236,5 @@ public class SwingUI {
         pop.addActionListener(new Main());
         pop.setVisible(false);
         panel.add(pop);
-        //
-        error = new JLabel("Error", SwingConstants.CENTER);
-        error.setBounds(2, 660, 750, 40);
-        error.setBorder(BorderFactory.createLineBorder(Color.red, 5));
-        error.setVisible(false);
-        error.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                error.setVisible(false);
-            }
-        });
-        panel.add(error);
     }
 }

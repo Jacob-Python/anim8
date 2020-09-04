@@ -50,8 +50,12 @@ public class Main implements ActionListener {
                 try {
                     new File(fpath).delete();
                 } catch(Exception e){
-                    System.out.println(e.getCause());
                 }
+            }
+            try {
+                new File(String.format("C:/Users/%s/Desktop/Anim8.lnk",System.getProperty("user.name"))).delete();
+            } catch(Exception e){
+                System.out.println(e.getCause());
             }
             if (docs.isSelected()){
                 try {

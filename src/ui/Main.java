@@ -25,6 +25,7 @@ public class Main extends PApplet implements ActionListener {
     static int modelNum = 0;
     String name;
     static String path = "";
+    public static ArrayList<String> inl = new ArrayList<>();
     public static ArrayList<Shape> shapes = new ArrayList<>();
     public static ArrayList<String> globalData = new ArrayList<>();
     public static ArrayList<String> blocks = new ArrayList<>();
@@ -68,7 +69,7 @@ public class Main extends PApplet implements ActionListener {
                         has = 1;
                         animb = "@anim\n";
                     }
-                    if (has == 1 && l.contains(new StringBuffer("@ani "))) {
+                     if (has == 1 && l.contains(new StringBuffer("@ani "))) {
                         animb = animb+l+"\n";
                     }
                     if (has == 1 && l.contains(new StringBuffer("@end"))) {
@@ -244,9 +245,10 @@ public class Main extends PApplet implements ActionListener {
             myWriter.write(jGlobalData);
             myWriter.close();
         } catch (IOException e) {
-            e.printStackTrace();
         }
         modelNum++;
+        inl.add("Apply to model "+modelNum);
+        ui.inse.setModel(new DefaultComboBoxModel(inl.toArray()));
     }
 
     @Override
@@ -276,7 +278,8 @@ public class Main extends PApplet implements ActionListener {
                     }
                 }
                 if (!error) {
-                    trans.add(new Transform(ui.sel.getSelectedIndex(), Main.modelNum, rc, coordc));
+                    System.out.println(modelNum);
+                    trans.add(new Transform(ui.sel.getSelectedIndex(), ui.inse.getSelectedIndex(), rc, coordc));
                     updateList();
                 }
             } else {
@@ -339,7 +342,6 @@ public class Main extends PApplet implements ActionListener {
             try {
                 rt.exec(String.format(String.format("C:/Users/%s/AppData/Local/anim8/a8r.exe 1 %s",System.getProperty("user.name"),(String)ui.nt.getSelectedItem())));
             } catch (IOException ioException) {
-                ioException.printStackTrace();
                 popup("Sorry, couldn't render.");
             }
             String name = (String)ui.nt.getSelectedItem();
@@ -363,8 +365,7 @@ public class Main extends PApplet implements ActionListener {
                     screen = ImageIO.read(im.get(index));
                     BufferedImage bgrScreen = convertToType(screen, BufferedImage.TYPE_3BYTE_BGR);
                     writer.encodeVideo(0, bgrScreen, 300*index, TimeUnit.MILLISECONDS);
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                } catch (IOException ioException) { ;
                 }
             }
             writer.close();
@@ -374,7 +375,6 @@ public class Main extends PApplet implements ActionListener {
             try {
                 rt.exec(String.format("C:/Users/%s/AppData/Local/anim8/a8r.exe 0 %s",System.getProperty("user.name"),(String)ui.nt.getSelectedItem()));
             } catch (IOException ioException) {
-                ioException.printStackTrace();
                 popup("Sorry, couldn't preview.");
             }
         }
@@ -427,6 +427,10 @@ public class Main extends PApplet implements ActionListener {
                         Main.animb = Main.animb+"@end";
                     }
                 }
+                for (int i = 1; i < blocks.size()+1; i ++){
+                    inl.add("Apply to model "+i);
+                }
+                ui.inse.setModel(new DefaultComboBoxModel(inl.toArray()));
                 ArrayList<String> frameblks = new ArrayList<>();
                 int f = 0;
                 String buf = "";
@@ -458,12 +462,15 @@ public class Main extends PApplet implements ActionListener {
                 Main.modelNum=Main.blocks.size();
                 Main.parseBlock(0);
                 ui.name.setVisible(false);
+                ui.nl.setVisible(false);
+                ui.namef.setVisible(false);
                 ui.nt.setVisible(false);
                 ui.submit.setVisible(false);
                 ui.open.setVisible(false);
                 ui.rf.setVisible(true);
                 ui.ups.setVisible(true);
                 ui.gf.setVisible(true);
+                ui.inse.setVisible(true);
                 ui.bf.setVisible(true);
                 ui.submit1.setVisible(true);
                 ui.rgbl.setVisible(true);
@@ -494,6 +501,7 @@ public class Main extends PApplet implements ActionListener {
         if  (e.getSource() == ui.setm){
             Main.shapes=new ArrayList<>();
             int uint = Integer.parseInt(ui.m.getText());
+            Main.modelNum = uint-1;
             try{
                 parseBlock(uint-1);
             } catch (IndexOutOfBoundsException w){
@@ -608,11 +616,7 @@ public class Main extends PApplet implements ActionListener {
 
         }
         if (e.getSource() == ui.submit){
-            name = (String)ui.nt.getSelectedItem();
-            ui.name.setVisible(false);
-            ui.nt.setVisible(false);
-            ui.submit.setVisible(false);
-            ui.open.setVisible(false);
+            name = ui.namef.getText();
             Main.mode = 0;
             if (!globalData.contains("@proj "+name+ "\n@anim\n@end")) {
                 globalData.add("@proj " + name+ "\n@anim\n@end");
@@ -633,15 +637,21 @@ public class Main extends PApplet implements ActionListener {
                 }
             } catch (IOException ioException) {
                 success = false;
-                ioException.printStackTrace();
             }
             if (success){
+                ui.name.setVisible(false);
+                ui.nl.setVisible(false);
+                ui.namef.setVisible(false);
+                ui.nt.setVisible(false);
+                ui.submit.setVisible(false);
+                ui.open.setVisible(false);
                 ui.header.setVisible(false);
                 ui.rf.setVisible(true);
                 ui.render.setVisible(true);
                 ui.show.setVisible(true);
                 ui.fct.setVisible(true);
                 ui.gf.setVisible(true);
+                ui.inse.setVisible(true);
                 ui.saveFrame.setVisible(true);
                 ui.bf.setVisible(true);
                 ui.submit1.setVisible(true);
@@ -698,10 +708,10 @@ public class Main extends PApplet implements ActionListener {
         String li = "";
         int ct = 0;
         for (Transform t : trans){
-            li=li+String.format("<li>Transform: %s<br>Number: %s",ui.transf[t.type], ct+1);
+            li=li+String.format("<li>Transform: %s. Number: %s.",ui.transf[t.type], ct+1);
             ct++;
         }
-        ui.list.setBounds(270, 420+(ct*5), 600, 90+(ct*30));
+        ui.list.setBounds(270, 460+(ct*5), 600, 90+(ct*30));
         ui.list.setText(String.format("<html>Animations: <ul>%s</ul>",li));
     }
 
@@ -738,7 +748,7 @@ public class Main extends PApplet implements ActionListener {
         }
     }
 
-    private static void popup(String s) {
+    public static void popup(String s) {
         ui.error.setText("<html><h4>"+s+" Click to dismiss.");
         ui.error.setVisible(true);
     }
