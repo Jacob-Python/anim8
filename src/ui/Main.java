@@ -25,6 +25,7 @@ public class Main extends PApplet implements ActionListener {
     static int modelNum = 0;
     String name;
     static String path = "";
+    static boolean fileBool = true;
     public static ArrayList<String> inl = new ArrayList<>();
     public static ArrayList<Shape> shapes = new ArrayList<>();
     public static ArrayList<String> globalData = new ArrayList<>();
@@ -278,8 +279,12 @@ public class Main extends PApplet implements ActionListener {
                     }
                 }
                 if (!error) {
-                    System.out.println(modelNum);
-                    trans.add(new Transform(ui.sel.getSelectedIndex(), ui.inse.getSelectedIndex(), rc, coordc));
+                    System.out.println(ui.inse.getSelectedIndex());
+                    if (ui.inse.getSelectedIndex() == -1) {
+                        trans.add(new Transform(ui.sel.getSelectedIndex(), 0, rc, coordc));
+                    } else {
+                        trans.add(new Transform(ui.sel.getSelectedIndex(), ui.inse.getSelectedIndex(), rc, coordc));
+                    }
                     updateList();
                 }
             } else {
@@ -340,7 +345,12 @@ public class Main extends PApplet implements ActionListener {
         if (e.getSource() == ui.render){
             Runtime rt = Runtime.getRuntime();
             try {
-                rt.exec(String.format(String.format("C:/Users/%s/AppData/Local/anim8/a8r.exe 1 %s",System.getProperty("user.name"),(String)ui.nt.getSelectedItem())));
+                if (fileBool){
+                    rt.exec(String.format("C:/Users/%s/AppData/Local/anim8/a8r.exe 1 %s",System.getProperty("user.name"),(String)ui.nt.getSelectedItem()));
+                } else {
+                    System.out.println(name);
+                    rt.exec(String.format("C:/Users/%s/AppData/Local/anim8/a8r.exe 1 %s",System.getProperty("user.name"),name));
+                }
             } catch (IOException ioException) {
                 popup("Sorry, couldn't render.");
             }
@@ -373,7 +383,12 @@ public class Main extends PApplet implements ActionListener {
         if (e.getSource() == ui.show){
             Runtime rt = Runtime.getRuntime();
             try {
-                rt.exec(String.format("C:/Users/%s/AppData/Local/anim8/a8r.exe 0 %s",System.getProperty("user.name"),(String)ui.nt.getSelectedItem()));
+                if (fileBool){
+                    rt.exec(String.format("C:/Users/%s/AppData/Local/anim8/a8r.exe 0 %s",System.getProperty("user.name"),(String)ui.nt.getSelectedItem()));
+                } else {
+                    System.out.println(name);
+                    rt.exec(String.format("C:/Users/%s/AppData/Local/anim8/a8r.exe 0 %s",System.getProperty("user.name"),name));
+                }
             } catch (IOException ioException) {
                 popup("Sorry, couldn't preview.");
             }
@@ -617,6 +632,7 @@ public class Main extends PApplet implements ActionListener {
         }
         if (e.getSource() == ui.submit){
             name = ui.namef.getText();
+            fileBool = false;
             Main.mode = 0;
             if (!globalData.contains("@proj "+name+ "\n@anim\n@end")) {
                 globalData.add("@proj " + name+ "\n@anim\n@end");
